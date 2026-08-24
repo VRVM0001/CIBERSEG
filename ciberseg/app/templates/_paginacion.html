@@ -1,0 +1,9 @@
+<div class="paginacion">
+  {% if pagina > 1 %}
+  <a class="btn btn-mini" href="{{ url_for(request.endpoint, **dict(request.args, pagina=pagina-1)) }}">← Anterior</a>
+  {% endif %}
+  <span class="pag-num">Página {{ pagina }}</span>
+  {% if hay_mas %}
+  <a class="btn btn-mini" href="{{ url_for(request.endpoint, **dict(request.args, pagina=pagina+1)) }}">Siguiente →</a>
+  {% endif %}
+</div>

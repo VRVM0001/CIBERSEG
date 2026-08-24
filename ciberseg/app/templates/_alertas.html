@@ -1,0 +1,5 @@
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in mensajes %}
+    <div class="alert {{ 'alert-ok' if cat == 'ok' else 'alert-error' }}">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}

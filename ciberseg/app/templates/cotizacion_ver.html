@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ cot.numero }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Cotización {{ cot.numero }}</span>
+  <a class="btn" href="{{ url_for('ventas.cotizaciones') }}">← Volver</a>
+  {% if 'ventas.editar' in session.permisos %}
+  <a class="btn" href="{{ url_for('ventas.cotizacion_editar', cot_id=cot.id) }}">Editar</a>
+  {% endif %}
+  <a class="btn" href="{{ url_for('ventas.cotizacion_pdf', cot_id=cot.id) }}">Descargar PDF</a>
+</div>
+{% include "_alertas.html" %}
+
+<div class="detalle-grid">
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Información</span>
+      {% set color = {'Aprobada':'badge-verde','Enviada':'badge-azul','Borrador':'badge-gris',
+                      'Rechazada':'badge-rojo','Vencida':'badge-rojo'} %}
+      <span class="badge {{ color.get(cot.estado,'badge-gris') }}">{{ cot.estado }}</span>
+    </div>
+    <dl class="ficha">
+      <dt>Cliente</dt><dd>{{ cot.cliente }}</dd>
+      <dt>Ejecutivo</dt><dd>{{ cot.ejecutivo or '—' }}</dd>
+      <dt>Fecha</dt><dd>{{ cot.fecha.strftime('%d/%m/%Y') if cot.fecha else '—' }}</dd>
+      <dt>Válida hasta</dt><dd>{{ cot.fecha_validez.strftime('%d/%m/%Y') if cot.fecha_validez else '—' }}</dd>
+      <dt>Notas</dt><dd>{{ cot.notas or '—' }}</dd>
+      {% if factura %}<dt>Factura</dt><dd><b>{{ factura.numero }}</b> ({{ factura.estado }})</dd>{% endif %}
+    </dl>
+  </div>
+
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Acciones</span></div>
+    {% if 'ventas.editar' in session.permisos %}
+    <form method="post" action="{{ url_for('ventas.cotizacion_estado', cot_id=cot.id) }}" class="acciones-estado">
+      <label>Cambiar estado:</label>
+      <select name="estado">
+        {% for es in estados %}<option value="{{ es }}" {{ 'selected' if es == cot.estado }}>{{ es }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn">Aplicar</button>
+    </form>
+    {% endif %}
+    {% if 'ventas.editar' in session.permisos %}
+    <form method="post" action="{{ url_for('ventas.cotizacion_enviar', cot_id=cot.id) }}" class="acciones-estado">
+      <label>Enviar por email:</label>
+      <select name="plantilla">
+        <option value="plantilla_seguimiento">Plantilla seguimiento</option>
+        <option value="plantilla_renovacion">Plantilla renovación</option>
+      </select>
+      <button type="submit" class="btn">Enviar PDF al contacto</button>
+    </form>
+    {% endif %}
+    {% if 'ventas.crear' in session.permisos and cot.estado == 'Aprobada' and not factura %}
+    <form method="post" action="{{ url_for('ventas.cotizacion_facturar', cot_id=cot.id) }}">
+      <button type="submit" class="btn btn-primario">Generar factura</button>
+    </form>
+    <p class="ayuda-texto">Crea la factura con los mismos montos, vencimiento a 30 días.</p>
+    {% elif cot.estado != 'Aprobada' and not factura %}
+    <p class="ayuda-texto">Para facturar, primero marca la cotización como <b>Aprobada</b>.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="widget" style="margin-top:16px">
+  <div class="widget__head"><span class="widget__title">Líneas</span></div>
+  <table class="tabla">
+    <thead><tr><th>SKU</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Desc.</th><th>Subtotal</th></tr></thead>
+    <tbody>
+      {% for l in lineas %}
+      <tr><td>{{ l.sku }}</td><td>{{ l.producto }}</td><td>{{ l.cantidad }}</td>
+          <td>${{ '{:,.2f}'.format(l.precio_unitario) }}</td><td>{{ l.descuento_pct }}%</td>
+          <td><b>${{ '{:,.2f}'.format(l.subtotal) }}</b></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="totales">
+    <div><span>Subtotal</span><b>${{ '{:,.2f}'.format(cot.subtotal) }}</b></div>
+    <div><span>ITBIS</span><b>${{ '{:,.2f}'.format(cot.impuesto) }}</b></div>
+    <div class="total-final"><span>TOTAL</span><b>${{ '{:,.2f}'.format(cot.total) }}</b></div>
+  </div>
+</div>
+{% endblock %}

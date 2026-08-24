@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Licencias{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Licencias</span>
+  <form class="buscador" method="get" action="{{ url_for('inventario.licencias') }}">
+    <input type="text" name="q" placeholder="Producto, cliente o clave…" value="{{ buscar }}">
+    <select name="estado" onchange="this.form.submit()">
+      <option value="">Todos los estados</option>
+      {% for es in estados %}<option value="{{ es }}" {{ 'selected' if es == estado }}>{{ es }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'inventario.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('inventario.licencia_nueva') }}">+ Nueva licencia</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr>
+      <th>Producto</th><th>Cliente</th><th>Tipo</th><th>Inicio</th><th>Vence</th>
+      <th>Días rest.</th><th>Estado</th><th class="col-acciones">Acciones</th>
+    </tr></thead>
+    <tbody>
+      {% for l in licencias %}
+      <tr>
+        <td><b>{{ l.sku }}</b> — {{ l.producto }}</td>
+        <td>{{ l.cliente }}</td>
+        <td>{{ l.tipo }}</td>
+        <td>{{ l.fecha_inicio.strftime('%d/%m/%Y') if l.fecha_inicio else '—' }}</td>
+        <td>{{ l.fecha_fin.strftime('%d/%m/%Y') if l.fecha_fin else 'Perpetua' }}</td>
+        <td>
+          {% if l.dias_restantes is none %}—
+          {% elif l.dias_restantes < 0 %}<span class="badge badge-rojo">Vencida</span>
+          {% elif l.dias_restantes <= 30 %}<span class="badge badge-rojo">{{ l.dias_restantes }} días ⚠</span>
+          {% else %}{{ l.dias_restantes }}{% endif %}
+        </td>
+        <td>{% set color = {'Activa':'badge-verde','Por vencer':'badge-azul','Vencida':'badge-rojo','Cancelada':'badge-gris'} %}
+          <span class="badge {{ color.get(l.estado,'badge-gris') }}">{{ l.estado }}</span></td>
+        <td class="col-acciones">
+          {% if 'inventario.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('inventario.licencia_editar', licencia_id=l.id) }}">Editar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="tabla-vacia">No se encontraron licencias.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

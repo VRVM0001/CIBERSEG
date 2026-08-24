@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('pipeline.oportunidades') }}">← Volver</a></div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre *</label>
+        <input name="nombre" required value="{{ op.nombre if op else '' }}"></div>
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" required><option value="">—</option>
+          {% for c in clientes_lista %}<option value="{{ c.id }}" {{ 'selected' if op and op.cliente_id == c.id }}>{{ c.nombre }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Ejecutivo</label>
+        <select name="ejecutivo_id"><option value="">—</option>
+          {% for u in ejecutivos %}<option value="{{ u.id }}" {{ 'selected' if op and op.ejecutivo_id == u.id }}>{{ u.nombre }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Etapa</label>
+        <select name="etapa">{% for e in etapas %}<option {{ 'selected' if op and op.etapa == e }}>{{ e }}</option>{% endfor %}</select></div>
+      <div class="campo"><label>Valor estimado (USD)</label>
+        <input type="number" name="valor_estimado" min="0" step="100" value="{{ op.valor_estimado if op else 0 }}"></div>
+      <div class="campo"><label>Probabilidad (%)</label>
+        <input type="number" name="probabilidad" min="0" max="100" value="{{ op.probabilidad if op else 50 }}"></div>
+      <div class="campo"><label>Cierre estimado</label>
+        <input type="date" name="fecha_cierre_estimada" value="{{ op.fecha_cierre_estimada if op and op.fecha_cierre_estimada else '' }}"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Notas</label>
+        <input name="notas" value="{{ op.notas if op and op.notas else '' }}"></div>
+    </div>
+    <div class="form-acciones"><button class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('pipeline.oportunidades') }}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

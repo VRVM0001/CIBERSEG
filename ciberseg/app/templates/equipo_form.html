@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('inventario.equipos') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" required>
+          <option value="">— Selecciona —</option>
+          {% for c in clientes_lista %}
+          <option value="{{ c.id }}" {{ 'selected' if equipo and equipo.cliente_id == c.id }}>{{ c.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Producto del catálogo</label>
+        <select name="producto_id">
+          <option value="">— Ninguno —</option>
+          {% for p in productos_lista %}
+          <option value="{{ p.id }}" {{ 'selected' if equipo and equipo.producto_id == p.id }}>{{ p.sku }} — {{ p.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Tipo</label>
+        <select name="tipo">
+          {% for t in tipos %}<option value="{{ t }}" {{ 'selected' if equipo and equipo.tipo == t }}>{{ t }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Estado</label>
+        <select name="estado">
+          {% for es in estados %}<option value="{{ es }}" {{ 'selected' if equipo and equipo.estado == es }}>{{ es }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Número de serie</label>
+        <input name="numero_serie" type="text" value="{{ equipo.numero_serie if equipo and equipo.numero_serie else '' }}"></div>
+      <div class="campo"><label>Hostname</label>
+        <input name="hostname" type="text" value="{{ equipo.hostname if equipo and equipo.hostname else '' }}"></div>
+      <div class="campo"><label>Ubicación</label>
+        <input name="ubicacion" type="text" placeholder="Datacenter, Sucursal Norte…"
+               value="{{ equipo.ubicacion if equipo and equipo.ubicacion else '' }}"></div>
+      <div class="campo"><label>Fecha de instalación</label>
+        <input name="fecha_instalacion" type="date" value="{{ equipo.fecha_instalacion if equipo and equipo.fecha_instalacion else '' }}"></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('inventario.equipos') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

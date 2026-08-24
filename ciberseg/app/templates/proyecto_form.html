@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('gestion.proyectos') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre del proyecto *</label>
+        <input name="nombre" type="text" required value="{{ proyecto.nombre if proyecto else '' }}"></div>
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" required>
+          <option value="">— Selecciona —</option>
+          {% for c in clientes_lista %}
+          <option value="{{ c.id }}" {{ 'selected' if proyecto and proyecto.cliente_id == c.id }}>{{ c.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Ingeniero líder</label>
+        <select name="ingeniero_lider_id">
+          <option value="">— Sin asignar —</option>
+          {% for i in ingenieros %}
+          <option value="{{ i.id }}" {{ 'selected' if proyecto and proyecto.ingeniero_lider_id == i.id }}>{{ i.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Fecha inicio</label>
+        <input type="date" name="fecha_inicio" value="{{ proyecto.fecha_inicio if proyecto else '' }}"></div>
+      <div class="campo"><label>Fin estimado</label>
+        <input type="date" name="fecha_fin_estimada" value="{{ proyecto.fecha_fin_estimada if proyecto else '' }}"></div>
+      <div class="campo"><label>Fin real</label>
+        <input type="date" name="fecha_fin_real" value="{{ proyecto.fecha_fin_real if proyecto else '' }}"></div>
+      <div class="campo"><label>Estado</label>
+        <select name="estado">
+          {% for es in estados %}<option value="{{ es }}" {{ 'selected' if proyecto and proyecto.estado == es }}>{{ es }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Presupuesto (USD)</label>
+        <input type="number" name="presupuesto" min="0" step="0.01"
+               value="{{ proyecto.presupuesto if proyecto and proyecto.presupuesto is not none else 0 }}"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Descripción</label>
+        <input type="text" name="descripcion" value="{{ proyecto.descripcion if proyecto and proyecto.descripcion else '' }}"></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('gestion.proyectos') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

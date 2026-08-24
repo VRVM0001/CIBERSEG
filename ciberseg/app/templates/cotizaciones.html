@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Cotizaciones{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Cotizaciones</span>
+  <form class="buscador" method="get" action="{{ url_for('ventas.cotizaciones') }}">
+    <input type="text" name="q" placeholder="Buscar por número o cliente…" value="{{ buscar }}">
+    <select name="estado" onchange="this.form.submit()">
+      <option value="">Todos los estados</option>
+      {% for es in estados %}<option value="{{ es }}" {{ 'selected' if es == estado }}>{{ es }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'ventas.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('ventas.cotizacion_nueva') }}">+ Nueva cotización</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr>
+      <th>Número</th><th>Cliente</th><th>Fecha</th><th>Válida hasta</th>
+      <th>Líneas</th><th>Total</th><th>Estado</th><th class="col-acciones">Acciones</th>
+    </tr></thead>
+    <tbody>
+      {% for co in cotizaciones %}
+      <tr>
+        <td><a class="enlace" href="{{ url_for('ventas.cotizacion_ver', cot_id=co.id) }}"><b>{{ co.numero }}</b></a></td>
+        <td>{{ co.cliente }}</td>
+        <td>{{ co.fecha.strftime('%d/%m/%Y') if co.fecha else '—' }}</td>
+        <td>{{ co.fecha_validez.strftime('%d/%m/%Y') if co.fecha_validez else '—' }}</td>
+        <td>{{ co.n_lineas }}</td>
+        <td><b>${{ '{:,.2f}'.format(co.total or 0) }}</b></td>
+        <td>
+          {% set color = {'Aprobada':'badge-verde','Enviada':'badge-azul','Borrador':'badge-gris',
+                          'Rechazada':'badge-rojo','Vencida':'badge-rojo'} %}
+          <span class="badge {{ color.get(co.estado,'badge-gris') }}">{{ co.estado }}</span>
+          {% if co.n_facturas %}<span class="badge badge-verde" title="Ya facturada">✓ Fact.</span>{% endif %}
+        </td>
+        <td class="col-acciones">
+          <a class="btn btn-mini" href="{{ url_for('ventas.cotizacion_ver', cot_id=co.id) }}">Ver</a>
+          {% if 'ventas.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('ventas.cotizacion_editar', cot_id=co.id) }}">Editar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="tabla-vacia">No se encontraron cotizaciones.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% include "_paginacion.html" %}
+</div>
+{% endblock %}

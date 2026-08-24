@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Métricas{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Métricas comerciales</span></div>
+<div class="kpis" style="margin-bottom:16px">
+  <div class="widget kpi"><div class="kpi__body">
+    <div class="kpi__val">{{ conversion }}%</div>
+    <div class="kpi__label">Tasa de conversión</div>
+    <div class="kpi__delta">{{ aprobadas }} aprobadas de {{ total_cot }} decididas</div></div></div>
+  <div class="widget kpi"><div class="kpi__body">
+    <div class="kpi__val">{{ dias_cierre if dias_cierre is not none else '—' }}</div>
+    <div class="kpi__label">Días promedio de cierre</div>
+    <div class="kpi__delta">de cotización a aprobación</div></div></div>
+</div>
+<div class="detalle-grid">
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Cartera por ejecutivo (cotizaciones aprobadas)</span></div>
+    <table class="tabla"><thead><tr><th>Ejecutivo</th><th>Cotizaciones</th><th>Valor</th></tr></thead><tbody>
+      {% for c in cartera %}<tr><td>{{ c.ejecutivo }}</td><td>{{ c.n }}</td>
+        <td><b>${{ '{:,.0f}'.format(c.total) }}</b></td></tr>
+      {% else %}<tr><td colspan="3" class="tabla-vacia">Sin datos.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Embudo de oportunidades</span></div>
+    <table class="tabla"><thead><tr><th>Etapa</th><th>#</th><th>Valor</th><th>Ponderado</th></tr></thead><tbody>
+      {% for e in embudo %}<tr><td>{{ e.etapa }}</td><td>{{ e.n }}</td>
+        <td>${{ '{:,.0f}'.format(e.valor) }}</td><td><b>${{ '{:,.0f}'.format(e.ponderado) }}</b></td></tr>
+      {% else %}<tr><td colspan="4" class="tabla-vacia">Sin oportunidades registradas.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+{% endblock %}

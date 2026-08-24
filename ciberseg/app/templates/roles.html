@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Roles y permisos{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Roles y permisos</span></div>
+{% include "_alertas.html" %}
+
+<div class="roles-grid">
+  {% for r in roles %}
+  <div class="widget rol-card">
+    <div class="widget__head">
+      <span class="widget__title">{{ r.nombre }}</span>
+      <span class="badge {{ 'badge-verde' if r.activo else 'badge-gris' }}">
+        {{ 'Activo' if r.activo else 'Inactivo' }}
+      </span>
+    </div>
+    <p class="rol-desc">{{ r.descripcion or 'Sin descripción.' }}</p>
+    <p class="rol-meta">{{ r.n_usuarios }} usuario(s) · {{ r.n_permisos }} permiso(s)</p>
+    <div class="rol-permisos">
+      {% set permisos = permisos_por_rol.get(r.id, []) %}
+      {% if permisos %}
+        {% for p in permisos %}<span class="badge badge-azul">{{ p.nombre }}</span>{% endfor %}
+      {% else %}
+        <span class="rol-sin">Este rol no tiene permisos asignados.</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Búsqueda{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Resultados de búsqueda</span></div>
+<div class="widget widget-form" style="max-width:640px;margin-bottom:16px">
+  <form method="get" action="{{ url_for('main.buscar') }}" class="buscador" style="margin:0">
+    <input type="text" name="q" value="{{ q }}" placeholder="Escribe al menos 2 caracteres…" autofocus>
+    <button type="submit" class="btn btn-primario">Buscar</button>
+  </form>
+</div>
+{% if q and total == 0 %}
+<div class="widget"><p class="tabla-vacia">Sin resultados para "{{ q }}".</p></div>
+{% endif %}
+{% for grupo, filas in resultados.items() if filas %}
+<div class="widget" style="margin-bottom:14px">
+  <div class="widget__head"><span class="widget__title">{{ grupo|capitalize }} ({{ filas|length }})</span></div>
+  <table class="tabla"><tbody>
+    {% for r in filas %}
+    <tr>
+      {% if grupo == 'empresas' %}
+        <td><a class="enlace" href="{{ url_for('crm.empresa_editar', empresa_id=r.id) }}"><b>{{ r.nombre }}</b></a></td>
+        <td>{{ r.sector or '—' }}</td><td>{{ r.ciudad or '—' }}</td>
+      {% elif grupo == 'clientes' %}
+        <td><a class="enlace" href="{{ url_for('crm.cliente_editar', cliente_id=r.id) }}"><b>{{ r.codigo }}</b></a></td>
+        <td>{{ r.nombre }}</td><td><span class="badge badge-azul">{{ r.estado }}</span></td>
+      {% elif grupo == 'contactos' %}
+        <td><a class="enlace" href="{{ url_for('crm.contacto_editar', contacto_id=r.id) }}"><b>{{ r.nombre }}</b></a></td>
+        <td>{{ r.cargo or '—' }}</td><td>{{ r.empresa }}</td>
+      {% elif grupo == 'cotizaciones' %}
+        <td><a class="enlace" href="{{ url_for('ventas.cotizacion_ver', cot_id=r.id) }}"><b>{{ r.numero }}</b></a></td>
+        <td>{{ r.cliente }}</td><td>${{ '{:,.2f}'.format(r.total or 0) }} · {{ r.estado }}</td>
+      {% else %}
+        <td><b>{{ r.numero }}</b></td><td>{{ r.cliente }}</td>
+        <td>${{ '{:,.2f}'.format(r.total or 0) }} · {{ r.estado }}</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody></table>
+</div>
+{% endfor %}
+{% endblock %}

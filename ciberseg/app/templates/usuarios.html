@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_icons.html" import ico %}
+{% block title %}CIBERSEG · Usuarios{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Usuarios</span>
+  <form class="buscador" method="get" action="{{ url_for('admin.usuarios') }}">
+    <input type="text" name="q" placeholder="Buscar por nombre, usuario o email…" value="{{ buscar }}">
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'usuarios.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('admin.usuario_nuevo') }}">+ Nuevo usuario</a>
+  {% endif %}
+</div>
+
+{% include "_alertas.html" %}
+
+<div class="widget">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Usuario</th><th>Nombre</th><th>Email</th><th>Rol</th>
+        <th>Último acceso</th><th>Estado</th><th class="col-acciones">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td><b>{{ u.username }}</b></td>
+        <td>{{ u.nombre }}</td>
+        <td>{{ u.email }}</td>
+        <td><span class="badge badge-azul">{{ u.rol }}</span></td>
+        <td>{{ u.ultimo_acceso.strftime('%d/%m/%Y %H:%M') if u.ultimo_acceso else '—' }}</td>
+        <td>
+          {% if u.activo %}<span class="badge badge-verde">Activo</span>
+          {% else %}<span class="badge badge-gris">Inactivo</span>{% endif %}
+        </td>
+        <td class="col-acciones">
+          {% if 'usuarios.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('admin.usuario_editar', usuario_id=u.id) }}">Editar</a>
+          {% endif %}
+          {% if 'usuarios.eliminar' in session.permisos and u.id != session.usuario_id %}
+          <form method="post" action="{{ url_for('admin.usuario_estado', usuario_id=u.id) }}" class="inline">
+            <button type="submit" class="btn btn-mini {{ 'btn-peligro' if u.activo }}">
+              {{ 'Desactivar' if u.activo else 'Activar' }}
+            </button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="tabla-vacia">No se encontraron usuarios.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

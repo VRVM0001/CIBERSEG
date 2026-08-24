@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('crm.clientes') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Empresa *</label>
+        <select name="empresa_id" required>
+          <option value="">— Selecciona una empresa —</option>
+          {% for e in empresas_lista %}
+          <option value="{{ e.id }}" {{ 'selected' if cliente and cliente.empresa_id == e.id }}>{{ e.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Ejecutivo asignado</label>
+        <select name="ejecutivo_id">
+          <option value="">— Sin asignar —</option>
+          {% for u in ejecutivos %}
+          <option value="{{ u.id }}" {{ 'selected' if cliente and cliente.ejecutivo_id == u.id }}>{{ u.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Tipo</label>
+        <select name="tipo">
+          {% for t in tipos %}
+          <option value="{{ t }}" {{ 'selected' if cliente and cliente.tipo == t }}>{{ t }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Segmento</label>
+        <select name="segmento">
+          {% for s in segmentos %}
+          <option value="{{ s }}" {{ 'selected' if cliente and cliente.segmento == s }}>{{ s }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Estado</label>
+        <select name="estado">
+          {% for es in estados %}
+          <option value="{{ es }}" {{ 'selected' if cliente and cliente.estado == es }}>{{ es }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Límite de crédito (USD)</label>
+        <input name="limite_credito" type="number" min="0" step="1000"
+               value="{{ cliente.limite_credito if cliente and cliente.limite_credito is not none else 0 }}"></div>
+      <div class="campo"><label>Fecha de alta</label>
+        <input name="fecha_alta" type="date"
+               value="{{ cliente.fecha_alta if cliente and cliente.fecha_alta else '' }}"></div>
+      <div class="campo"><label>Etiquetas (separadas por coma)</label>
+        <input name="etiquetas" placeholder="renovación Q3, riesgo de fuga…"
+               value="{{ cliente.etiquetas if cliente and cliente.etiquetas else '' }}"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Notas</label>
+        <input name="notas" type="text" value="{{ cliente.notas if cliente and cliente.notas else '' }}"></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('crm.clientes') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

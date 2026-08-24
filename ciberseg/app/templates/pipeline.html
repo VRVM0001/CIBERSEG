@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Oportunidades{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Pipeline de oportunidades</span>
+  {% if 'clientes.crear' in session.permisos %}
+  <a class="btn btn-primario" style="margin-left:auto" href="{{ url_for('pipeline.oportunidad_nueva') }}">+ Nueva oportunidad</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="kanban">
+  {% for et in etapas %}
+  <div class="kanban-col {{ 'col-ganada' if et=='Ganada' }} {{ 'col-perdida' if et=='Perdida' }}">
+    <div class="kanban-head">{{ et }} <span>${{ '{:,.0f}'.format(valor.get(et,0)) }}</span></div>
+    {% for o in cols.get(et, []) %}
+    <div class="kanban-card">
+      <b>{{ o.nombre }}</b>
+      <div class="kc-cliente">{{ o.cliente }}</div>
+      <div class="kc-valor">${{ '{:,.0f}'.format(o.valor_estimado or 0) }} · {{ o.probabilidad }}%</div>
+      {% if o.fecha_cierre_estimada %}<div class="kc-fecha">Cierre: {{ o.fecha_cierre_estimada.strftime('%d/%m/%Y') }}</div>{% endif %}
+      <div class="kc-acciones">
+        {% if 'clientes.editar' in session.permisos %}
+        <form method="post" action="{{ url_for('pipeline.oportunidad_etapa', op_id=o.id) }}" class="inline">
+          <input type="hidden" name="dir" value="atras"><button class="btn btn-mini" {{ 'disabled' if loop0 }}>◀</button></form>
+        <a class="btn btn-mini" href="{{ url_for('pipeline.oportunidad_editar', op_id=o.id) }}">Editar</a>
+        <form method="post" action="{{ url_for('pipeline.oportunidad_etapa', op_id=o.id) }}" class="inline">
+          <input type="hidden" name="dir" value="adelante"><button class="btn btn-mini">▶</button></form>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="kanban-vacio">—</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

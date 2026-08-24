@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('ventas.contratos') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" required>
+          <option value="">— Selecciona —</option>
+          {% for c in clientes_lista %}
+          <option value="{{ c.id }}" {{ 'selected' if contrato and contrato.cliente_id == c.id }}>{{ c.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Tipo</label>
+        <select name="tipo">
+          {% for t in tipos %}<option value="{{ t }}" {{ 'selected' if contrato and contrato.tipo == t }}>{{ t }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Fecha inicio *</label>
+        <input type="date" name="fecha_inicio" required value="{{ contrato.fecha_inicio if contrato else '' }}"></div>
+      <div class="campo"><label>Fecha fin</label>
+        <input type="date" name="fecha_fin" value="{{ contrato.fecha_fin if contrato and contrato.fecha_fin else '' }}"></div>
+      <div class="campo"><label>Monto (USD)</label>
+        <input type="number" name="monto" min="0" step="0.01"
+               value="{{ contrato.monto if contrato and contrato.monto is not none else 0 }}"></div>
+      <div class="campo"><label>Estado</label>
+        <select name="estado">
+          {% for es in estados %}<option value="{{ es }}" {{ 'selected' if contrato and contrato.estado == es }}>{{ es }}</option>{% endfor %}
+        </select></div>
+      <div class="campo" style="grid-column:1/-1"><label>Términos</label>
+        <input type="text" name="terminos" value="{{ contrato.terminos if contrato and contrato.terminos else '' }}"></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('ventas.contratos') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Ingenieros{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Ingenieros</span>
+  <form class="buscador" method="get" action="{{ url_for('gestion.ingenieros') }}">
+    <input type="text" name="q" placeholder="Buscar por nombre o especialidad…" value="{{ buscar }}">
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'usuarios.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('gestion.ingeniero_nuevo') }}">+ Nuevo ingeniero</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr><th>Nombre</th><th>Especialidad</th><th>Nivel</th><th>Certificaciones</th>
+      <th>Email</th><th>Estado</th><th class="col-acciones">Acciones</th></tr></thead>
+    <tbody>
+      {% for i in ingenieros %}
+      <tr>
+        <td><b>{{ i.nombre }}</b></td>
+        <td>{{ i.especialidad or '—' }}</td>
+        <td><span class="badge badge-azul">{{ i.nivel }}</span></td>
+        <td>{{ i.certificaciones or '—' }}</td>
+        <td>{{ i.email or '—' }}</td>
+        <td>{% if i.activo %}<span class="badge badge-verde">Activo</span>
+            {% else %}<span class="badge badge-gris">Inactivo</span>{% endif %}</td>
+        <td class="col-acciones">
+          {% if 'usuarios.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('gestion.ingeniero_editar', ing_id=i.id) }}">Editar</a>
+          {% endif %}
+          {% if 'usuarios.eliminar' in session.permisos %}
+          <form method="post" action="{{ url_for('gestion.ingeniero_estado', ing_id=i.id) }}" class="inline">
+            <button class="btn btn-mini {{ 'btn-peligro' if i.activo }}">{{ 'Desactivar' if i.activo else 'Activar' }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}<tr><td colspan="7" class="tabla-vacia">Sin ingenieros registrados.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

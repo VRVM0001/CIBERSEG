@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Actividades{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Actividades y seguimientos</span>
+  <a class="btn" style="margin-left:auto" href="{{ url_for('pipeline.actividades', pendientes=0 if solo_pend else 1) }}">
+    {{ 'Ver todas' if solo_pend else 'Solo pendientes' }}</a></div>
+{% include "_alertas.html" %}
+{% if 'clientes.crear' in session.permisos %}
+<div class="widget widget-form" style="margin-bottom:14px">
+  <form method="post" action="{{ url_for('pipeline.actividad_nueva') }}">
+    <div class="form-grid form-grid-4">
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" required><option value="">—</option>
+          {% for c in clientes_lista %}<option value="{{ c.id }}">{{ c.nombre }}</option>{% endfor %}</select></div>
+      <div class="campo"><label>Tipo</label>
+        <select name="tipo">{% for t in tipos %}<option>{{ t }}</option>{% endfor %}</select></div>
+      <div class="campo"><label>Asunto *</label><input name="asunto" required></div>
+      <div class="campo"><label>Próxima acción</label><input type="date" name="proxima_accion"></div>
+      <div class="campo" style="grid-column:span 3"><label>Notas</label><input name="notas"></div>
+      <div class="campo" style="display:flex;align-items:end">
+        <button class="btn btn-primario">Registrar</button></div>
+    </div>
+  </form>
+</div>
+{% endif %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Asunto</th><th>Próx. acción</th>
+      <th>Registrado por</th><th>Estado</th><th class="col-acciones"></th></tr></thead>
+    <tbody>
+      {% for a in actividades %}
+      <tr>
+        <td>{{ a.fecha.strftime('%d/%m/%Y %H:%M') if a.fecha else '—' }}</td>
+        <td>{{ a.cliente }}</td>
+        <td><span class="badge badge-azul">{{ a.tipo }}</span></td>
+        <td><b>{{ a.asunto }}</b>{% if a.notas %} · <span style="color:#94a3b8">{{ a.notas }}</span>{% endif %}</td>
+        <td>{{ a.proxima_accion.strftime('%d/%m/%Y') if a.proxima_accion else '—' }}</td>
+        <td>{{ a.usuario or '—' }}</td>
+        <td>{% if a.completada %}<span class="badge badge-verde">Hecha</span>
+            {% else %}<span class="badge badge-gris">Pendiente</span>{% endif %}</td>
+        <td class="col-acciones">
+          {% if not a.completada and 'clientes.editar' in session.permisos %}
+          <form method="post" action="{{ url_for('pipeline.actividad_completar', act_id=a.id) }}" class="inline">
+            <button class="btn btn-mini">Completar</button></form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}<tr><td colspan="8" class="tabla-vacia">Sin actividades.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

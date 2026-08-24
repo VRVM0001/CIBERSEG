@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('ventas.facturas') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+
+      <div class="campo"><label>Cotización aprobada (opcional)</label>
+        <select name="cotizacion_id" id="selCotizacion">
+          <option value="">— Sin cotización (factura directa) —</option>
+          {% for co in cotizaciones_lista %}
+          <option value="{{ co.id }}">{{ co.numero }} · {{ co.cliente }} · ${{ '{:,.2f}'.format(co.total or 0) }}</option>
+          {% endfor %}
+        </select></div>
+
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" id="selCliente">
+          <option value="">— Selecciona un cliente —</option>
+          {% for c in clientes_lista %}
+          <option value="{{ c.id }}">{{ c.nombre }} ({{ c.codigo }})</option>
+          {% endfor %}
+        </select></div>
+
+      <div class="campo"><label>Fecha de emisión</label>
+        <input name="fecha_emision" type="date"></div>
+
+      <div class="campo"><label>Fecha de vencimiento</label>
+        <input name="fecha_vencimiento" type="date"></div>
+
+      <div class="campo"><label>Subtotal (USD)</label>
+        <input name="subtotal" id="inpSubtotal" type="number" step="0.01" min="0" value="0"></div>
+
+      <div class="campo"><label>Estado</label>
+        <select name="estado">
+          {% for es in estados %}<option value="{{ es }}">{{ es }}</option>{% endfor %}
+        </select></div>
+
+    </div>
+
+    <p class="ayuda-form" style="margin:6px 2px 0;font-size:13px;color:var(--muted,#5a6675)">
+      Si eliges una cotización, se copian su cliente y sus montos y se ignora el subtotal escrito.
+      Si no, el ITBIS ({{ itbis_pct }}%) se calcula automáticamente sobre el subtotal.
+      Si dejas las fechas vacías se usan hoy y hoy + 30 días.
+    </p>
+
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('ventas.facturas') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+// Al elegir una cotizacion, los campos manuales se desactivan (los datos vienen de ella)
+(() => {
+  const cot = document.getElementById('selCotizacion');
+  const cli = document.getElementById('selCliente');
+  const sub = document.getElementById('inpSubtotal');
+  const sync = () => {
+    const usaCot = cot.value !== '';
+    cli.disabled = usaCot;
+    sub.disabled = usaCot;
+    cli.style.opacity = sub.style.opacity = usaCot ? .5 : 1;
+  };
+  cot.addEventListener('change', sync);
+  sync();
+})();
+</script>
+{% endblock %}

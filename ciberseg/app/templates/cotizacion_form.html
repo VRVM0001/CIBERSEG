@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('ventas.cotizaciones') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<form method="post" autocomplete="off">
+<div class="widget widget-form" style="max-width:100%">
+  <div class="form-grid form-grid-4">
+    <div class="campo"><label>Cliente *</label>
+      <select name="cliente_id" required>
+        <option value="">— Selecciona —</option>
+        {% for c in clientes_lista %}
+        <option value="{{ c.id }}" {{ 'selected' if cot and cot.cliente_id == c.id }}>{{ c.nombre }} ({{ c.codigo }})</option>
+        {% endfor %}
+      </select></div>
+    <div class="campo"><label>Ejecutivo</label>
+      <select name="ejecutivo_id">
+        <option value="">— Sin asignar —</option>
+        {% for u in ejecutivos %}
+        <option value="{{ u.id }}" {{ 'selected' if cot and cot.ejecutivo_id == u.id }}>{{ u.nombre }}</option>
+        {% endfor %}
+      </select></div>
+    <div class="campo"><label>Fecha</label>
+      <input type="date" name="fecha" value="{{ cot.fecha if cot else '' }}"></div>
+    <div class="campo"><label>Válida hasta</label>
+      <input type="date" name="fecha_validez" value="{{ cot.fecha_validez if cot else '' }}"></div>
+    <div class="campo"><label>Estado</label>
+      <select name="estado">
+        {% for es in estados %}
+        <option value="{{ es }}" {{ 'selected' if cot and cot.estado == es }}>{{ es }}</option>
+        {% endfor %}
+      </select></div>
+    <div class="campo" style="grid-column:span 3"><label>Notas</label>
+      <input type="text" name="notas" value="{{ cot.notas if cot and cot.notas else '' }}"></div>
+  </div>
+</div>
+
+<div class="widget" style="margin-top:16px">
+  <div class="widget__head">
+    <span class="widget__title">Líneas de la cotización</span>
+    <button type="button" class="btn btn-mini" onclick="agregarLinea()">+ Agregar línea</button>
+  </div>
+  <table class="tabla" id="tablaLineas">
+    <thead><tr>
+      <th style="width:38%">Producto</th><th>Cantidad</th><th>Precio (USD)</th>
+      <th>Desc. %</th><th>Subtotal</th><th></th>
+    </tr></thead>
+    <tbody id="cuerpoLineas"></tbody>
+  </table>
+  <div class="totales">
+    <div><span>Subtotal</span><b id="tSubtotal">$0.00</b></div>
+    <div><span>ITBIS ({{ (itbis*100)|int }}%)</span><b id="tImpuesto">$0.00</b></div>
+    <div class="total-final"><span>TOTAL</span><b id="tTotal">$0.00</b></div>
+  </div>
+</div>
+
+<div class="form-acciones" style="margin-top:16px">
+  <button type="submit" class="btn btn-primario">Guardar cotización</button>
+  <a class="btn" href="{{ url_for('ventas.cotizaciones') }}">Cancelar</a>
+</div>
+</form>
+
+<script>
+const PRODUCTOS = [
+  {% for p in productos %}
+  {id: {{ p.id }}, nombre: {{ (p.sku ~ ' — ' ~ p.nombre)|tojson }}, precio: {{ p.precio_lista }}},
+  {% endfor %}
+];
+const LINEAS_INICIALES = [
+  {% for l in lineas %}
+  {producto_id: {{ l.producto_id }}, cantidad: {{ l.cantidad }},
+   precio: {{ l.precio_unitario }}, descuento: {{ l.descuento_pct }}},
+  {% endfor %}
+];
+const ITBIS = {{ itbis }};
+
+function agregarLinea(datos){
+  const tr = document.createElement('tr');
+  const opciones = PRODUCTOS.map(p =>
+    `<option value="${p.id}" data-precio="${p.precio}"
+      ${datos && datos.producto_id === p.id ? 'selected' : ''}>${p.nombre}</option>`).join('');
+  tr.innerHTML = `
+    <td><select name="producto_id[]" onchange="precioDeProducto(this)" required>
+        <option value="">— Producto —</option>${opciones}</select></td>
+    <td><input type="number" name="cantidad[]" min="1" value="${datos ? datos.cantidad : 1}"
+         oninput="recalcular()" style="width:80px"></td>
+    <td><input type="number" name="precio[]" min="0" step="0.01" value="${datos ? datos.precio : 0}"
+         oninput="recalcular()" style="width:110px"></td>
+    <td><input type="number" name="descuento[]" min="0" max="100" value="${datos ? datos.descuento : 0}"
+         oninput="recalcular()" style="width:70px"></td>
+    <td class="sub-linea">$0.00</td>
+    <td><button type="button" class="btn btn-mini btn-peligro" onclick="this.closest('tr').remove(); recalcular()">✕</button></td>`;
+  document.getElementById('cuerpoLineas').appendChild(tr);
+  recalcular();
+}
+function precioDeProducto(sel){
+  const op = sel.selectedOptions[0];
+  if (op && op.dataset.precio){
+    sel.closest('tr').querySelector('input[name="precio[]"]').value = op.dataset.precio;
+  }
+  recalcular();
+}
+function recalcular(){
+  let subtotal = 0;
+  document.querySelectorAll('#cuerpoLineas tr').forEach(tr => {
+    const cant = parseFloat(tr.querySelector('input[name="cantidad[]"]').value) || 0;
+    const precio = parseFloat(tr.querySelector('input[name="precio[]"]').value) || 0;
+    const desc = parseFloat(tr.querySelector('input[name="descuento[]"]').value) || 0;
+    const sub = cant * precio * (1 - desc/100);
+    tr.querySelector('.sub-linea').textContent = '$' + sub.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+    subtotal += sub;
+  });
+  const imp = subtotal * ITBIS;
+  const fmt = n => '$' + n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('tSubtotal').textContent = fmt(subtotal);
+  document.getElementById('tImpuesto').textContent = fmt(imp);
+  document.getElementById('tTotal').textContent = fmt(subtotal + imp);
+}
+if (LINEAS_INICIALES.length) LINEAS_INICIALES.forEach(l => agregarLinea(l));
+else agregarLinea();
+</script>
+{% endblock %}

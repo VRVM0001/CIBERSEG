@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Configuración{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Configuración</span></div>
+{% include "_alertas.html" %}
+<div class="widget widget-form" style="max-width:620px">
+  <form method="post">
+    <h3 class="ayuda-h">Notificaciones</h3>
+    <div class="config-lista">
+      <label class="config-item config-master">
+        <input type="checkbox" name="notif_activas" {{ 'checked' if cfg.notif_activas == '1' }}>
+        <b>Notificaciones activas</b> (interruptor general de la campana)
+      </label>
+      <label class="config-item">
+        <input type="checkbox" name="notif_cotizaciones" {{ 'checked' if cfg.notif_cotizaciones == '1' }}>
+        Cotizaciones enviadas sin respuesta
+      </label>
+      <label class="config-item">
+        <input type="checkbox" name="notif_facturas" {{ 'checked' if cfg.notif_facturas == '1' }}>
+        Facturas vencidas o por cobrar
+      </label>
+      <label class="config-item">
+        <input type="checkbox" name="notif_equipos" {{ 'checked' if cfg.notif_equipos == '1' }}>
+        Equipos fuera de servicio o en mantenimiento
+      </label>
+      <label class="config-item">
+        <input type="checkbox" name="notif_inventario" {{ 'checked' if cfg.notif_inventario == '1' }}>
+        Stock bajo y licencias por vencer
+      </label>
+      <label class="config-item">
+        <input type="checkbox" name="notif_actividades" {{ 'checked' if cfg.notif_actividades == '1' }}>
+        Seguimientos de clientes vencidos
+      </label>
+      <label class="config-item">
+        <input type="checkbox" name="notif_prospectos" {{ 'checked' if cfg.notif_prospectos == '1' }}>
+        Clientes prospecto por dar seguimiento
+      </label>
+    </div>
+    <h3 class="ayuda-h">Seguridad</h3>
+    <div class="campo" style="max-width:260px">
+      <label>Cierre de sesión por inactividad (minutos, 0 = nunca)</label>
+      <input type="number" name="sesion_timeout_min" min="0" value="{{ cfg.sesion_timeout_min }}">
+    </div>
+    <h3 class="ayuda-h">Ventas</h3>
+    <div class="campo" style="max-width:220px">
+      <label>ITBIS / impuesto (%)</label>
+      <input type="number" name="itbis_pct" min="0" max="100" value="{{ cfg.itbis_pct }}">
+    </div>
+    <h3 class="ayuda-h">Correo saliente (SMTP) — para enviar cotizaciones</h3>
+    <div class="form-grid">
+      <div class="campo"><label>Servidor SMTP</label><input name="smtp_host" value="{{ cfg.smtp_host }}" placeholder="smtp.gmail.com"></div>
+      <div class="campo"><label>Puerto</label><input type="number" name="smtp_puerto" value="{{ cfg.smtp_puerto }}"></div>
+      <div class="campo"><label>Usuario</label><input name="smtp_usuario" value="{{ cfg.smtp_usuario }}"></div>
+      <div class="campo"><label>Contraseña</label><input type="password" name="smtp_clave" value="{{ cfg.smtp_clave }}"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Remitente (From)</label><input name="smtp_remitente" value="{{ cfg.smtp_remitente }}" placeholder="ventas@ciberseg.do"></div>
+    </div>
+    <h3 class="ayuda-h">Plantillas de correo — usa {cliente} y {numero}</h3>
+    <div class="campo"><label>Seguimiento de cotización</label>
+      <input name="plantilla_seguimiento" value="{{ cfg.plantilla_seguimiento }}"></div>
+    <div class="campo" style="margin-top:10px"><label>Renovación</label>
+      <input name="plantilla_renovacion" value="{{ cfg.plantilla_renovacion }}"></div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar configuración</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

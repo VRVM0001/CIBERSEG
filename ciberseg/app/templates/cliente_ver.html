@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ cli.codigo }}{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">{{ cli.empresa }} <small style="color:#94a3b8">{{ cli.codigo }}</small></span>
+  <a class="btn" href="{{ url_for('crm.clientes') }}">← Volver</a>
+  {% if 'clientes.editar' in session.permisos %}
+  <a class="btn" href="{{ url_for('crm.cliente_editar', cliente_id=cli.id) }}">Editar</a>{% endif %}</div>
+{% include "_alertas.html" %}
+
+<div class="detalle-grid">
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Ficha</span>
+      <span class="badge {{ {'Activo':'badge-verde','Prospecto':'badge-azul','Suspendido':'badge-rojo'}.get(cli.estado,'badge-gris') }}">{{ cli.estado }}</span></div>
+    <dl class="ficha">
+      <dt>Sector</dt><dd>{{ cli.sector or '—' }} · {{ cli.ciudad or '—' }}</dd>
+      <dt>Tipo</dt><dd>{{ cli.tipo }} · {{ cli.segmento }}</dd>
+      <dt>Ejecutivo</dt><dd>{{ cli.ejecutivo or '—' }}</dd>
+      <dt>Límite crédito</dt><dd>${{ '{:,.0f}'.format(cli.limite_credito or 0) }}</dd>
+      <dt>Facturado (pagado)</dt><dd><b>${{ '{:,.2f}'.format(total_fact) }}</b></dd>
+      <dt>Etiquetas</dt><dd>{% for t in (cli.etiquetas or '').split(',') if t.strip() %}
+        <a class="badge badge-azul" href="{{ url_for('crm.clientes', etiqueta=t.strip()) }}">{{ t.strip() }}</a>
+        {% else %}—{% endfor %}</dd>
+      <dt>Notas</dt><dd>{{ cli.notas or '—' }}</dd>
+    </dl>
+  </div>
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Contactos</span></div>
+    <table class="tabla"><tbody>
+      {% for ct in contactos %}<tr><td><b>{{ ct.nombre }}</b>{% if ct.es_principal %} <span class="badge badge-azul">Principal</span>{% endif %}</td>
+        <td>{{ ct.cargo or '—' }}</td><td>{{ ct.email or ct.celular or '—' }}</td></tr>
+      {% else %}<tr><td class="tabla-vacia">Sin contactos.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="detalle-grid" style="margin-top:16px">
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Cotizaciones</span></div>
+    <table class="tabla"><tbody>
+      {% for co in cotizaciones %}<tr>
+        <td><a class="enlace" href="{{ url_for('ventas.cotizacion_ver', cot_id=co.id) }}"><b>{{ co.numero }}</b></a></td>
+        <td>{{ co.fecha.strftime('%d/%m/%Y') if co.fecha }}</td><td>{{ co.estado }}</td>
+        <td>${{ '{:,.0f}'.format(co.total or 0) }}</td></tr>
+      {% else %}<tr><td class="tabla-vacia">Sin cotizaciones.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Facturas</span></div>
+    <table class="tabla"><tbody>
+      {% for f in facturas %}<tr><td><b>{{ f.numero }}</b></td>
+        <td>{{ f.fecha_emision.strftime('%d/%m/%Y') if f.fecha_emision }}</td>
+        <td>{{ f.estado }}</td><td>${{ '{:,.0f}'.format(f.total or 0) }}</td></tr>
+      {% else %}<tr><td class="tabla-vacia">Sin facturas.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="detalle-grid" style="margin-top:16px">
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Oportunidades</span></div>
+    <table class="tabla"><tbody>
+      {% for o in oportunidades %}<tr><td><b>{{ o.nombre }}</b></td><td>{{ o.etapa }}</td>
+        <td>${{ '{:,.0f}'.format(o.valor_estimado or 0) }} · {{ o.probabilidad }}%</td></tr>
+      {% else %}<tr><td class="tabla-vacia">Sin oportunidades.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <div class="widget">
+    <div class="widget__head"><span class="widget__title">Equipos y proyectos</span></div>
+    <table class="tabla"><tbody>
+      {% for eq in equipos %}<tr><td>{{ eq.tipo }}</td><td>{{ eq.hostname or eq.numero_serie }}</td><td>{{ eq.estado }}</td></tr>{% endfor %}
+      {% for p in proyectos %}<tr><td>Proyecto</td><td><b>{{ p.nombre }}</b></td><td>{{ p.estado }}</td></tr>{% endfor %}
+      {% if not equipos and not proyectos %}<tr><td class="tabla-vacia">Sin equipos ni proyectos.</td></tr>{% endif %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="widget" style="margin-top:16px">
+  <div class="widget__head"><span class="widget__title">Actividades</span></div>
+  {% if 'clientes.crear' in session.permisos %}
+  <form method="post" action="{{ url_for('pipeline.actividad_nueva') }}" class="acciones-estado">
+    <input type="hidden" name="cliente_id" value="{{ cli.id }}">
+    <select name="tipo"><option>Llamada</option><option>Reunion</option><option>Correo</option><option>Tarea</option></select>
+    <input name="asunto" placeholder="Asunto…" required style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:8px">
+    <input type="date" name="proxima_accion" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:8px">
+    <button class="btn btn-mini btn-primario">Registrar</button>
+  </form>
+  {% endif %}
+  <table class="tabla"><tbody>
+    {% for a in actividades %}<tr>
+      <td>{{ a.fecha.strftime('%d/%m/%Y %H:%M') if a.fecha }}</td>
+      <td><span class="badge badge-azul">{{ a.tipo }}</span></td>
+      <td><b>{{ a.asunto }}</b></td>
+      <td>{{ a.proxima_accion.strftime('Próx: %d/%m/%Y') if a.proxima_accion else '' }}</td>
+      <td>{% if a.completada %}<span class="badge badge-verde">Hecha</span>{% else %}<span class="badge badge-gris">Pendiente</span>{% endif %}</td>
+    </tr>{% else %}<tr><td class="tabla-vacia">Sin actividades registradas.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+
+<div class="widget" style="margin-top:16px">
+  <div class="widget__head"><span class="widget__title">Historial de cambios (auditoría)</span></div>
+  <table class="tabla"><tbody>
+    {% for h in historial %}<tr>
+      <td>{{ h.fecha.strftime('%d/%m/%Y %H:%M') if h.fecha }}</td><td>{{ h.usuario or '—' }}</td>
+      <td><span class="badge badge-azul">{{ h.accion }}</span></td>
+      <td class="celda-json">{{ h.datos_nuevos or '—' }}</td></tr>
+    {% else %}<tr><td class="tabla-vacia">Sin cambios registrados.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

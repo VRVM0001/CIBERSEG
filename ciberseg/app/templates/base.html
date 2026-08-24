@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CIBERSEG{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<script>if(localStorage.getItem('tema')==='oscuro')document.body.classList.add('oscuro');</script>
+{% from "_icons.html" import ico %}
+
+<div class="sidebar-backdrop" onclick="toggleNav()"></div>
+
+<!-- ===== BARRA SUPERIOR ===== -->
+<header class="topbar">
+  <div class="topbar__brand">
+    <span class="topbar__mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3z" fill="#fff" opacity=".95"/>
+      </svg>
+    </span>
+    <span class="topbar__name">CIBER<span>SEG</span></span>
+  </div>
+  <button class="topbar__toggle" onclick="toggleNav()" aria-label="Menú">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+
+  <div class="topbar__spacer"></div>
+
+  <div class="topbar__actions">
+    <!-- Búsqueda global -->
+    <form class="topbar__search" id="busquedaGlobal" method="get" action="{{ url_for('main.buscar') }}">
+      <input type="text" name="q" id="inputBusqueda" placeholder="Buscar en todo el sistema…"
+             value="{{ request.args.get('q','') }}" autocomplete="off">
+    </form>
+    <button class="topbar__btn" title="Buscar" type="button" onclick="toggleBusqueda()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    </button>
+    <!-- Ayuda -->
+    <a class="topbar__btn" title="Ayuda" href="{{ url_for('main.ayuda') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8v.5"/><path d="M12 17h.01"/></svg>
+    </a>
+    <!-- Notificaciones -->
+    <div class="topbar__notif-wrap">
+      <button class="topbar__btn" title="Notificaciones" type="button" onclick="toggleNotifs(event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
+        <span class="topbar__badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <div class="panel-notifs" id="panelNotifs">
+        <div class="panel-notifs__head">Notificaciones</div>
+        <div id="listaNotifs"><div class="panel-notifs__vacio">Cargando…</div></div>
+      </div>
+    </div>
+    <button class="topbar__btn" title="Modo oscuro" type="button" onclick="toggleOscuro()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <!-- Usuario -->
+    <div class="topbar__user" onclick="toggleUserMenu(event)" title="Cuenta">
+      <span class="topbar__avatar">{{ (session.usuario_nombre or 'U')[0] }}</span>
+      <span class="topbar__uname">{{ session.username or 'usuario' }}</span>
+      <svg class="topbar__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      <div class="panel-user" id="panelUser">
+        <div class="panel-user__nombre">{{ session.usuario_nombre }}</div>
+        <div class="panel-user__rol">{{ session.rol_nombre }}</div>
+        <a href="{{ url_for('main.perfil') }}">Mi perfil</a>
+        <a href="{{ url_for('main.ayuda') }}">Ayuda</a>
+        <a class="panel-user__salir" href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MENÚ LATERAL ===== -->
+<aside class="sidebar">
+  {% set act = active|default('dashboard') %}
+
+  <div class="nav-group">
+    <a class="nav-item {{ 'is-active' if act=='dashboard' }}" href="{{ url_for('main.index') }}">{{ ico('dashboard') }} Dashboard</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group__label">CRM</div>
+    <a class="nav-item {{ 'is-active' if act=='clientes' }}" href="{{ url_for('crm.clientes') }}">{{ ico('clientes') }} Clientes</a>
+    <a class="nav-item {{ 'is-active' if act=='empresas' }}" href="{{ url_for('crm.empresas') }}">{{ ico('empresas') }} Empresas</a>
+    <a class="nav-item {{ 'is-active' if act=='contactos' }}" href="{{ url_for('crm.contactos') }}">{{ ico('contactos') }} Contactos</a>
+    <a class="nav-item {{ 'is-active' if act=='oportunidades' }}" href="{{ url_for('pipeline.oportunidades') }}">{{ ico('cotizaciones') }} Oportunidades</a>
+    <a class="nav-item {{ 'is-active' if act=='actividades' }}" href="{{ url_for('pipeline.actividades') }}">{{ ico('auditoria') }} Actividades</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group__label">Ventas</div>
+    <a class="nav-item {{ 'is-active' if act=='cotizaciones' }}" href="{{ url_for('ventas.cotizaciones') }}">{{ ico('cotizaciones') }} Cotizaciones</a>
+    <a class="nav-item {{ 'is-active' if act=='facturas' }}" href="{{ url_for('ventas.facturas') }}">{{ ico('facturas') }} Facturas</a>
+    <a class="nav-item {{ 'is-active' if act=='contratos' }}" href="{{ url_for('ventas.contratos') }}">{{ ico('contratos') }} Contratos</a>
+    <a class="nav-item {{ 'is-active' if act=='metricas' }}" href="{{ url_for('pipeline.metricas') }}">{{ ico('dashboard') }} Métricas</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group__label">Inventario</div>
+    <a class="nav-item {{ 'is-active' if act=='productos' }}" href="{{ url_for('inventario.productos') }}">{{ ico('productos') }} Productos</a>
+    <a class="nav-item {{ 'is-active' if act=='equipos' }}" href="{{ url_for('inventario.equipos') }}">{{ ico('equipos') }} Equipos</a>
+    <a class="nav-item {{ 'is-active' if act=='licencias' }}" href="{{ url_for('inventario.licencias') }}">{{ ico('licencias') }} Licencias</a>
+  </div>
+
+  <div class="nav-group">
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group__label">Gestión</div>
+    <a class="nav-item {{ 'is-active' if act=='proyectos' }}" href="{{ url_for('gestion.proyectos') }}">{{ ico('proyectos') }} Proyectos</a>
+    <a class="nav-item {{ 'is-active' if act=='ingenieros' }}" href="{{ url_for('gestion.ingenieros') }}">{{ ico('usuarios') }} Ingenieros</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group__label">Sistema</div>
+    <a class="nav-item {{ 'is-active' if act=='usuarios' }}" href="{{ url_for('admin.usuarios') }}">{{ ico('usuarios') }} Usuarios</a>
+    <a class="nav-item {{ 'is-active' if act=='roles' }}" href="{{ url_for('admin.roles') }}">{{ ico('roles') }} Roles y permisos</a>
+    <a class="nav-item {{ 'is-active' if act=='auditoria' }}" href="{{ url_for('admin.auditoria') }}">{{ ico('auditoria') }} Auditoría</a>
+    <a class="nav-item {{ 'is-active' if act=='config' }}" href="{{ url_for('main.configuracion') }}">{{ ico('config') }} Configuración</a>
+  </div>
+</aside>
+
+<!-- ===== CONTENIDO ===== -->
+<main class="content">
+  {% block content %}{% endblock %}
+</main>
+
+<script>
+  function toggleNav(){
+    if (window.innerWidth <= 900) document.body.classList.toggle('nav-open');
+    else document.body.classList.toggle('nav-colapsada');
+  }
+</script>
+{% block scripts %}{% endblock %}
+<script>
+function toggleBusqueda(){
+  const f = document.getElementById('busquedaGlobal');
+  f.classList.toggle('abierta');
+  if (f.classList.contains('abierta')) document.getElementById('inputBusqueda').focus();
+  else if (document.getElementById('inputBusqueda').value.trim()) f.submit();
+}
+document.getElementById('inputBusqueda').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.target.value.trim()) e.preventDefault();
+});
+let notifsCargadas = false;
+function toggleNotifs(e){
+  e.stopPropagation();
+  cerrar('panelUser');
+  const p = document.getElementById('panelNotifs');
+  p.classList.toggle('abierto');
+  if (p.classList.contains('abierto') && !notifsCargadas) cargarNotifs();
+}
+function cargarNotifs(){
+  fetch('{{ url_for("main.api_notificaciones") }}').then(r => r.json()).then(d => {
+    notifsCargadas = true;
+    const badge = document.getElementById('notifBadge');
+    if (d.total > 0){ badge.textContent = d.total; badge.style.display = 'flex'; }
+    else badge.style.display = 'none';
+    const cont = document.getElementById('listaNotifs');
+    cont.innerHTML = d.total === 0
+      ? '<div class="panel-notifs__vacio">No hay notificaciones pendientes 🎉</div>'
+      : d.avisos.map(a =>
+          `<a class="panel-notifs__item ${a.tipo}" href="${a.url}">
+             <span class="punto"></span>${a.texto}</a>`).join('');
+  }).catch(() => {
+    document.getElementById('listaNotifs').innerHTML =
+      '<div class="panel-notifs__vacio">No se pudieron cargar.</div>';
+  });
+}
+function toggleUserMenu(e){
+  e.stopPropagation();
+  cerrar('panelNotifs');
+  document.getElementById('panelUser').classList.toggle('abierto');
+}
+function cerrar(id){ document.getElementById(id).classList.remove('abierto'); }
+document.addEventListener('click', () => { cerrar('panelNotifs'); cerrar('panelUser'); });
+document.getElementById('panelNotifs').addEventListener('click', e => e.stopPropagation());
+cargarNotifs();  // carga el contador al abrir cualquier página
+function toggleOscuro(){
+  document.body.classList.toggle('oscuro');
+  localStorage.setItem('tema', document.body.classList.contains('oscuro') ? 'oscuro' : 'claro');
+}
+if (localStorage.getItem('tema') === 'oscuro') document.body.classList.add('oscuro');
+</script>
+</body>
+</html>

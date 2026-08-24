@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('crm.contactos') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Empresa *</label>
+        <select name="empresa_id" required>
+          <option value="">— Selecciona una empresa —</option>
+          {% for e in empresas_lista %}
+          <option value="{{ e.id }}" {{ 'selected' if contacto and contacto.empresa_id == e.id }}>{{ e.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Nombre completo *</label>
+        <input name="nombre" type="text" required value="{{ contacto.nombre if contacto else '' }}"></div>
+      <div class="campo"><label>Cargo</label>
+        <input name="cargo" type="text" value="{{ contacto.cargo if contacto and contacto.cargo else '' }}"></div>
+      <div class="campo"><label>Departamento</label>
+        <input name="departamento" type="text" value="{{ contacto.departamento if contacto and contacto.departamento else '' }}"></div>
+      <div class="campo"><label>Email</label>
+        <input name="email" type="email" value="{{ contacto.email if contacto and contacto.email else '' }}"></div>
+      <div class="campo"><label>Teléfono</label>
+        <input name="telefono" type="text" value="{{ contacto.telefono if contacto and contacto.telefono else '' }}"></div>
+      <div class="campo"><label>Celular</label>
+        <input name="celular" type="text" value="{{ contacto.celular if contacto and contacto.celular else '' }}"></div>
+      <div class="campo campo-check">
+        <label><input type="checkbox" name="es_principal" value="1"
+               {{ 'checked' if contacto and contacto.es_principal }}> Es el contacto principal de la empresa</label>
+      </div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('crm.contactos') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

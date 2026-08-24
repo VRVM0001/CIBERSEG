@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('inventario.productos') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Fabricante *</label>
+        <select name="fabricante_id" required>
+          <option value="">— Selecciona —</option>
+          {% for f in fabricantes %}
+          <option value="{{ f.id }}" {{ 'selected' if producto and producto.fabricante_id == f.id }}>{{ f.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>SKU *</label>
+        <input name="sku" type="text" required value="{{ producto.sku if producto else '' }}"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Nombre *</label>
+        <input name="nombre" type="text" required value="{{ producto.nombre if producto else '' }}"></div>
+      <div class="campo"><label>Categoría</label>
+        <select name="categoria">
+          {% for cat in categorias %}<option value="{{ cat }}" {{ 'selected' if producto and producto.categoria == cat }}>{{ cat }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Tipo</label>
+        <select name="tipo">
+          {% for t in tipos %}<option value="{{ t }}" {{ 'selected' if producto and producto.tipo == t }}>{{ t }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Precio de lista (USD)</label>
+        <input name="precio_lista" type="number" min="0" step="0.01"
+               value="{{ producto.precio_lista if producto and producto.precio_lista is not none else 0 }}"></div>
+      <div class="campo"><label>Stock mínimo (alerta)</label>
+        <input name="stock_minimo" type="number" min="0"
+               value="{{ producto.stock_minimo if producto and producto.stock_minimo is not none else 0 }}"></div>
+      {% if not producto or not producto.get('id') %}
+      <div class="campo"><label>Stock inicial</label>
+        <input name="stock" type="number" min="0" value="{{ producto.stock if producto else 0 }}"></div>
+      {% endif %}
+      <div class="campo" style="grid-column:1/-1"><label>Descripción</label>
+        <input name="descripcion" type="text" value="{{ producto.descripcion if producto and producto.descripcion else '' }}"></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('inventario.productos') }}">Cancelar</a>
+    </div>
+  </form>
+  {% if producto and producto.get('id') %}
+  <p class="ayuda-texto" style="padding:10px 0 0">El stock actual se modifica desde la lista con el ajuste ±
+  (queda registrado en auditoría con su motivo).</p>
+  {% endif %}
+</div>
+{% endblock %}

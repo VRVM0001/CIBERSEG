@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('crm.empresas') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Nombre *</label>
+        <input name="nombre" type="text" required value="{{ empresa.nombre if empresa else '' }}"></div>
+      <div class="campo"><label>RNC</label>
+        <input name="rnc" type="text" value="{{ empresa.rnc if empresa and empresa.rnc else '' }}"></div>
+      <div class="campo"><label>Sector</label>
+        <input name="sector" type="text" placeholder="Banca, Retail, Salud…"
+               value="{{ empresa.sector if empresa and empresa.sector else '' }}"></div>
+      <div class="campo"><label>Tamaño</label>
+        <select name="tamano">
+          {% for t in tamanos %}
+          <option value="{{ t }}" {{ 'selected' if empresa and empresa.tamano == t }}>{{ t }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Teléfono</label>
+        <input name="telefono" type="text" value="{{ empresa.telefono if empresa and empresa.telefono else '' }}"></div>
+      <div class="campo"><label>Email</label>
+        <input name="email" type="email" value="{{ empresa.email if empresa and empresa.email else '' }}"></div>
+      <div class="campo"><label>Sitio web</label>
+        <input name="sitio_web" type="text" value="{{ empresa.sitio_web if empresa and empresa.sitio_web else '' }}"></div>
+      <div class="campo"><label>Ciudad</label>
+        <input name="ciudad" type="text" value="{{ empresa.ciudad if empresa and empresa.ciudad else '' }}"></div>
+      <div class="campo"><label>Dirección</label>
+        <input name="direccion" type="text" value="{{ empresa.direccion if empresa and empresa.direccion else '' }}"></div>
+      <div class="campo"><label>País</label>
+        <input name="pais" type="text" value="{{ empresa.pais if empresa and empresa.pais else 'Republica Dominicana' }}"></div>
+    </div>
+    {% if mostrar_forzar %}
+    <label class="config-item" style="margin:10px 0"><input type="checkbox" name="forzar" value="1">
+      Crear de todos modos (confirmo que no es un duplicado)</label>
+    {% endif %}
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('crm.empresas') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

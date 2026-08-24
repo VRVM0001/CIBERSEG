@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Empresas{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Empresas</span>
+  <form class="buscador" method="get" action="{{ url_for('crm.empresas') }}">
+    <input type="text" name="q" placeholder="Buscar por nombre, RNC o sector…" value="{{ buscar }}">
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'clientes.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('crm.empresa_nueva') }}">+ Nueva empresa</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr>
+      <th>Empresa</th><th>RNC</th><th>Sector</th><th>Tamaño</th><th>Ciudad</th>
+      <th>Clientes</th><th>Contactos</th><th>Estado</th><th class="col-acciones">Acciones</th>
+    </tr></thead>
+    <tbody>
+      {% for e in empresas %}
+      <tr>
+        <td><b>{{ e.nombre }}</b></td>
+        <td>{{ e.rnc or '—' }}</td>
+        <td>{{ e.sector or '—' }}</td>
+        <td>{{ e.tamano }}</td>
+        <td>{{ e.ciudad or '—' }}</td>
+        <td>{{ e.n_clientes }}</td>
+        <td>{{ e.n_contactos }}</td>
+        <td>{% if e.activo %}<span class="badge badge-verde">Activa</span>
+            {% else %}<span class="badge badge-gris">Inactiva</span>{% endif %}</td>
+        <td class="col-acciones">
+          {% if 'clientes.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('crm.empresa_editar', empresa_id=e.id) }}">Editar</a>
+          {% endif %}
+          {% if 'clientes.eliminar' in session.permisos %}
+          <form method="post" action="{{ url_for('crm.empresa_estado', empresa_id=e.id) }}" class="inline">
+            <button type="submit" class="btn btn-mini {{ 'btn-peligro' if e.activo }}">
+              {{ 'Desactivar' if e.activo else 'Activar' }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="tabla-vacia">No se encontraron empresas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% include "_paginacion.html" %}
+</div>
+{% endblock %}

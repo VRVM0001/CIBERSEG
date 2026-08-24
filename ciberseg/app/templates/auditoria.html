@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Auditoría{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Auditoría</span>
+  <form class="buscador" method="get" action="{{ url_for('admin.auditoria') }}">
+    <select name="tabla" onchange="this.form.submit()">
+      <option value="">Todas las tablas</option>
+      {% for t in tablas %}
+      <option value="{{ t }}" {{ 'selected' if t == tabla }}>{{ t }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+{% include "_alertas.html" %}
+
+<div class="widget">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Fecha</th><th>Usuario</th><th>Tabla</th><th>Acción</th>
+        <th>Registro</th><th>Detalle</th><th>IP</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in eventos %}
+      <tr>
+        <td>{{ e.fecha.strftime('%d/%m/%Y %H:%M:%S') if e.fecha else '—' }}</td>
+        <td>{{ e.usuario or '—' }}</td>
+        <td>{{ e.tabla_afectada }}</td>
+        <td>
+          <span class="badge {{ 'badge-verde' if e.accion == 'INSERT' else ('badge-azul' if e.accion == 'UPDATE' else 'badge-rojo') }}">
+            {{ e.accion }}
+          </span>
+        </td>
+        <td>{{ e.registro_id or '—' }}</td>
+        <td class="celda-json">
+          {% if e.datos_nuevos %}{{ e.datos_nuevos }}{% elif e.datos_anteriores %}{{ e.datos_anteriores }}{% else %}—{% endif %}
+        </td>
+        <td>{{ e.ip_origen or '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="tabla-vacia">Aún no hay eventos registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Mi perfil{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Mi perfil</span></div>
+{% include "_alertas.html" %}
+<div class="widget widget-form" style="max-width:560px">
+  <form method="post" autocomplete="off">
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="campo"><label>Usuario</label>
+        <input type="text" value="{{ yo.username }}" disabled></div>
+      <div class="campo"><label>Nombre completo *</label>
+        <input type="text" name="nombre" required value="{{ yo.nombre }}"></div>
+      <div class="campo"><label>Email *</label>
+        <input type="email" name="email" required value="{{ yo.email }}"></div>
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:6px 0">
+      <div class="campo"><label>Contraseña actual (solo si vas a cambiarla)</label>
+        <input type="password" name="clave_actual"></div>
+      <div class="campo"><label>Contraseña nueva (mínimo 6 caracteres)</label>
+        <input type="password" name="clave_nueva" minlength="6"></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar cambios</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "_icons.html" import ico %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">{{ titulo }}</span></div>
+<div class="placeholder">
+  {{ ico(active) }}
+  <h3>Módulo en construcción</h3>
+  <p>El módulo <b>{{ titulo }}</b> se construirá en la <b>{{ fase }}</b>.<br>
+     La estructura de datos ya existe en la base de datos.</p>
+</div>
+{% endblock %}

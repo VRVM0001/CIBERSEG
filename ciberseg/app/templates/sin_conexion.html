@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Sin conexión{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Dashboard</span></div>
+<div class="placeholder">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#d64545" stroke-width="1.8"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>
+  <h3>Sin conexión a la base de datos</h3>
+  <p>Revisa tu archivo <b>.env</b> y que el servicio de SQL Server esté encendido.</p>
+  {% if estado.error %}
+  <p style="margin-top:16px; font-size:13px; color:#94a3b8; max-width:700px; word-break:break-word;">
+    <b>Detalle técnico:</b><br>{{ estado.error }}
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

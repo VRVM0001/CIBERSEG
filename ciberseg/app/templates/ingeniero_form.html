@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('gestion.ingenieros') }}">← Volver</a></div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Nombre *</label>
+        <input name="nombre" required value="{{ ing.nombre if ing else '' }}"></div>
+      <div class="campo"><label>Especialidad</label>
+        <input name="especialidad" placeholder="Seguridad perimetral, redes…"
+               value="{{ ing.especialidad if ing and ing.especialidad else '' }}"></div>
+      <div class="campo"><label>Nivel</label>
+        <select name="nivel">
+          {% for n in niveles %}<option {{ 'selected' if ing and ing.nivel == n }}>{{ n }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Certificaciones</label>
+        <input name="certificaciones" placeholder="NSE4, CCNA…"
+               value="{{ ing.certificaciones if ing and ing.certificaciones else '' }}"></div>
+      <div class="campo"><label>Email</label>
+        <input type="email" name="email" value="{{ ing.email if ing and ing.email else '' }}"></div>
+      <div class="campo"><label>Teléfono</label>
+        <input name="telefono" value="{{ ing.telefono if ing and ing.telefono else '' }}"></div>
+    </div>
+    <div class="form-acciones"><button class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('gestion.ingenieros') }}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

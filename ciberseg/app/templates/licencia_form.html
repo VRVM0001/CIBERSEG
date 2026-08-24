@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('inventario.licencias') }}">← Volver</a>
+</div>
+{% include "_alertas.html" %}
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo"><label>Producto *</label>
+        <select name="producto_id" required>
+          <option value="">— Selecciona —</option>
+          {% for p in productos_lista %}
+          <option value="{{ p.id }}" {{ 'selected' if licencia and licencia.producto_id == p.id }}>{{ p.sku }} — {{ p.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Cliente *</label>
+        <select name="cliente_id" required>
+          <option value="">— Selecciona —</option>
+          {% for c in clientes_lista %}
+          <option value="{{ c.id }}" {{ 'selected' if licencia and licencia.cliente_id == c.id }}>{{ c.nombre }}</option>
+          {% endfor %}
+        </select></div>
+      <div class="campo"><label>Clave / Serial</label>
+        <input name="clave" type="text" value="{{ licencia.clave if licencia and licencia.clave else '' }}"></div>
+      <div class="campo"><label>Tipo</label>
+        <select name="tipo">
+          {% for t in tipos %}<option value="{{ t }}" {{ 'selected' if licencia and licencia.tipo == t }}>{{ t }}</option>{% endfor %}
+        </select></div>
+      <div class="campo"><label>Fecha inicio *</label>
+        <input name="fecha_inicio" type="date" required value="{{ licencia.fecha_inicio if licencia else '' }}"></div>
+      <div class="campo"><label>Fecha fin</label>
+        <input name="fecha_fin" type="date" value="{{ licencia.fecha_fin if licencia and licencia.fecha_fin else '' }}"></div>
+      <div class="campo"><label>Estado</label>
+        <select name="estado">
+          {% for es in estados %}<option value="{{ es }}" {{ 'selected' if licencia and licencia.estado == es }}>{{ es }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('inventario.licencias') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

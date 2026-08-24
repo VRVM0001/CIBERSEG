@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Contratos{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Contratos</span>
+  <form class="buscador" method="get" action="{{ url_for('ventas.contratos') }}">
+    <input type="text" name="q" placeholder="Buscar por número o cliente…" value="{{ buscar }}">
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'ventas.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('ventas.contrato_nuevo') }}">+ Nuevo contrato</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr>
+      <th>Número</th><th>Cliente</th><th>Tipo</th><th>Inicio</th><th>Fin</th>
+      <th>Monto</th><th>Estado</th><th class="col-acciones">Acciones</th>
+    </tr></thead>
+    <tbody>
+      {% for ct in contratos %}
+      <tr>
+        <td><b>{{ ct.numero }}</b></td>
+        <td>{{ ct.cliente }}</td>
+        <td>{{ ct.tipo }}</td>
+        <td>{{ ct.fecha_inicio.strftime('%d/%m/%Y') if ct.fecha_inicio else '—' }}</td>
+        <td>{{ ct.fecha_fin.strftime('%d/%m/%Y') if ct.fecha_fin else '—' }}</td>
+        <td><b>${{ '{:,.2f}'.format(ct.monto or 0) }}</b></td>
+        <td>{% set color = {'Vigente':'badge-verde','Por vencer':'badge-azul','Vencido':'badge-rojo','Cancelado':'badge-gris'} %}
+          <span class="badge {{ color.get(ct.estado,'badge-gris') }}">{{ ct.estado }}</span></td>
+        <td class="col-acciones">
+          {% if 'ventas.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('ventas.contrato_editar', contrato_id=ct.id) }}">Editar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="tabla-vacia">No se encontraron contratos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

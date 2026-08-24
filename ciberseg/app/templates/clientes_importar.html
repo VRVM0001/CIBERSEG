@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Importar clientes{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Importar clientes desde CSV</span>
+  <a class="btn" href="{{ url_for('crm.clientes') }}">← Volver</a></div>
+{% include "_alertas.html" %}
+<div class="widget widget-form" style="max-width:620px">
+  <p class="ayuda-p">Archivo <b>.csv separado por punto y coma (;)</b> con encabezados:
+  <code>empresa;tipo;segmento;estado</code>. Solo <b>empresa</b> es obligatoria; si la empresa
+  no existe, se crea automáticamente. Ejemplo:</p>
+  <pre class="ayuda-p" style="background:#f8fafc;padding:10px;border-radius:8px">empresa;tipo;segmento;estado
+Banco Popular;Corporativo;Estrategico;Activo
+Farmacia XYZ;PYME;Regular;Prospecto</pre>
+  <form method="post" enctype="multipart/form-data">
+    <div class="campo"><label>Archivo CSV</label>
+      <input type="file" name="archivo" accept=".csv" required></div>
+    <div class="form-acciones"><button class="btn btn-primario">Importar</button></div>
+  </form>
+</div>
+{% endblock %}

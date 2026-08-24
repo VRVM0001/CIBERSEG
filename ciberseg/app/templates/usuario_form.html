@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · {{ titulo }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">{{ titulo }}</span>
+  <a class="btn" href="{{ url_for('admin.usuarios') }}">← Volver</a>
+</div>
+
+{% include "_alertas.html" %}
+
+<div class="widget widget-form">
+  <form method="post" autocomplete="off">
+    <div class="form-grid">
+      <div class="campo">
+        <label for="username">Usuario *</label>
+        <input id="username" name="username" type="text" required
+               value="{{ usuario.username if usuario else '' }}">
+      </div>
+      <div class="campo">
+        <label for="nombre">Nombre completo *</label>
+        <input id="nombre" name="nombre" type="text" required
+               value="{{ usuario.nombre if usuario else '' }}">
+      </div>
+      <div class="campo">
+        <label for="email">Email *</label>
+        <input id="email" name="email" type="email" required
+               value="{{ usuario.email if usuario else '' }}">
+      </div>
+      <div class="campo">
+        <label for="rol_id">Rol *</label>
+        <select id="rol_id" name="rol_id" required>
+          <option value="">— Selecciona un rol —</option>
+          {% for r in roles %}
+          <option value="{{ r.id }}" {{ 'selected' if usuario and usuario.rol_id == r.id }}>{{ r.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label for="password">
+          Contraseña {{ '*' if not usuario or not usuario.id else '(dejar en blanco para no cambiarla)' }}
+        </label>
+        <input id="password" name="password" type="password"
+               {{ 'required' if not usuario or not usuario.get('id') }} minlength="6">
+      </div>
+    </div>
+    <div class="form-acciones">
+      <button type="submit" class="btn btn-primario">Guardar</button>
+      <a class="btn" href="{{ url_for('admin.usuarios') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

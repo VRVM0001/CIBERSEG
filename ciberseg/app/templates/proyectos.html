@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Proyectos{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Proyectos</span>
+  <form class="buscador" method="get" action="{{ url_for('gestion.proyectos') }}">
+    <input type="text" name="q" placeholder="Buscar por proyecto o cliente…" value="{{ buscar }}">
+    <select name="estado" onchange="this.form.submit()">
+      <option value="">Todos los estados</option>
+      {% for es in estados %}<option value="{{ es }}" {{ 'selected' if es == estado }}>{{ es }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'ventas.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('gestion.proyecto_nuevo') }}">+ Nuevo proyecto</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr>
+      <th>Proyecto</th><th>Cliente</th><th>Líder</th><th>Inicio</th>
+      <th>Fin estimado</th><th>Presupuesto</th><th>Estado</th><th class="col-acciones">Acciones</th>
+    </tr></thead>
+    <tbody>
+      {% for p in proyectos %}
+      <tr>
+        <td><b>{{ p.nombre }}</b></td>
+        <td>{{ p.cliente }}</td>
+        <td>{{ p.lider or '—' }}</td>
+        <td>{{ p.fecha_inicio.strftime('%d/%m/%Y') if p.fecha_inicio else '—' }}</td>
+        <td>{{ p.fecha_fin_estimada.strftime('%d/%m/%Y') if p.fecha_fin_estimada else '—' }}</td>
+        <td>${{ '{:,.0f}'.format(p.presupuesto or 0) }}</td>
+        <td>{% set color = {'En curso':'badge-azul','Completado':'badge-verde',
+                            'Planificado':'badge-gris','En pausa':'badge-gris','Cancelado':'badge-rojo'} %}
+          <span class="badge {{ color.get(p.estado,'badge-gris') }}">{{ p.estado }}</span></td>
+        <td class="col-acciones">
+          {% if 'ventas.editar' in session.permisos %}
+          <a class="btn btn-mini" href="{{ url_for('gestion.proyecto_editar', proyecto_id=p.id) }}">Editar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="tabla-vacia">No hay proyectos registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

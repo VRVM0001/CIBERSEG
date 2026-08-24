@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Ayuda{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="toolbar__title">Ayuda</span></div>
+<div class="widget widget-form" style="max-width:860px">
+  <h3 class="ayuda-h">¿Qué es CIBERSEG?</h3>
+  <p class="ayuda-p">Sistema de gestión para una empresa distribuidora de soluciones de
+  ciberseguridad: clientes, ventas, inventario técnico y proyectos, con control de
+  usuarios, roles y auditoría.</p>
+
+  <h3 class="ayuda-h">Flujo comercial</h3>
+  <p class="ayuda-p">1) Registra la <b>Empresa</b> y su <b>Cliente</b> → 2) crea una
+  <b>Cotización</b> con líneas de productos (el sistema calcula subtotal, ITBIS y total)
+  → 3) márcala <b>Aprobada</b> → 4) pulsa <b>Generar factura</b> → 5) marca la factura
+  como <b>Pagada</b> al cobrar. El Dashboard refleja todo automáticamente.</p>
+
+  <h3 class="ayuda-h">Botones de la barra superior</h3>
+  <p class="ayuda-p"><b>🔍 Buscar:</b> búsqueda global en empresas, clientes, contactos,
+  cotizaciones y facturas. <b>🔔 Notificaciones:</b> avisos reales (cotizaciones sin
+  responder, facturas vencidas, equipos fuera de servicio, prospectos). <b>Usuario:</b>
+  acceso a tu perfil (cambiar nombre, email y contraseña) y cierre de sesión.</p>
+
+  <h3 class="ayuda-h">Roles y permisos</h3>
+  <p class="ayuda-p">Cada usuario tiene un rol y cada rol un conjunto de permisos por
+  módulo (ver/crear/editar/eliminar). Los botones que no te corresponden simplemente no
+  aparecen. Todo cambio queda registrado en <b>Auditoría</b>.</p>
+
+  <h3 class="ayuda-h">Soporte</h3>
+  <p class="ayuda-p">Usuario inicial: <b>admin</b>. Los módulos marcados "en construcción"
+  llegan en las próximas fases (Inventario y Proyectos).</p>
+</div>
+{% endblock %}

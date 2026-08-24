@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}CIBERSEG · Productos{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span class="toolbar__title">Productos</span>
+  <form class="buscador" method="get" action="{{ url_for('inventario.productos') }}">
+    <input type="text" name="q" placeholder="Buscar por nombre, SKU o fabricante…" value="{{ buscar }}">
+    <select name="categoria" onchange="this.form.submit()">
+      <option value="">Todas las categorías</option>
+      {% for cat in categorias %}<option value="{{ cat }}" {{ 'selected' if cat == categoria }}>{{ cat }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+  {% if 'inventario.crear' in session.permisos %}
+  <a class="btn btn-primario" href="{{ url_for('inventario.producto_nuevo') }}">+ Nuevo producto</a>
+  {% endif %}
+</div>
+{% include "_alertas.html" %}
+<div class="widget">
+  <table class="tabla">
+    <thead><tr>
+      <th>SKU</th><th>Producto</th><th>Fabricante</th><th>Categoría</th>
+      <th>Precio</th><th>Stock</th><th>Estado</th><th class="col-acciones">Acciones</th>
+    </tr></thead>
+    <tbody>
+      {% for p in productos %}
+      <tr>
+        <td><b>{{ p.sku }}</b></td>
+        <td>{{ p.nombre }}</td>
+        <td>{{ p.fabricante }}</td>
+        <td>{{ p.categoria }}</td>
+        <td>${{ '{:,.2f}'.format(p.precio_lista or 0) }}</td>
+        <td>
+          {% if p.tipo in ('Suscripcion','Servicio') %}—
+          {% elif p.stock <= p.stock_minimo %}
+            <span class="badge badge-rojo" title="Stock mínimo: {{ p.stock_minimo }}">{{ p.stock }} ⚠ bajo</span>
+          {% else %}<b>{{ p.stock }}</b>{% endif %}
+        </td>
+        <td>{% if p.activo %}<span class="badge badge-verde">Activo</span>
+            {% else %}<span class="badge badge-gris">Inactivo</span>{% endif %}</td>
+        <td class="col-acciones">
+          {% if 'inventario.editar' in session.permisos %}
+          <form method="post" action="{{ url_for('inventario.producto_stock', producto_id=p.id) }}" class="inline acciones-estado-mini" title="Entrada (+) o salida (-) de unidades">
+            <input type="number" name="ajuste" placeholder="±" style="width:58px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px">
+            <button type="submit" class="btn btn-mini">Stock</button>
+          </form>
+          <a class="btn btn-mini" href="{{ url_for('inventario.producto_editar', producto_id=p.id) }}">Editar</a>
+          {% endif %}
+          {% if 'inventario.eliminar' in session.permisos %}
+          <form method="post" action="{{ url_for('inventario.producto_estado', producto_id=p.id) }}" class="inline">
+            <button type="submit" class="btn btn-mini {{ 'btn-peligro' if p.activo }}">{{ 'Desact.' if p.activo else 'Activar' }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="tabla-vacia">No se encontraron productos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
